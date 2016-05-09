@@ -63,7 +63,7 @@ const Feedback = React.createClass({
                       <textarea className="field" name="comment" value={this.state.comment} onChange ={this.handleChange}/>
                       <div className='form__action'>
                         <button type="button" className="btn btn-cancel" onClick ={this.onDismiss} >Cancel</button>
-                        <button type="submit" className="btn btn-submit">Send</button>
+                        <button type="button" className="btn btn-submit">Send</button>
                       </div>
                     </form>
             </div>
