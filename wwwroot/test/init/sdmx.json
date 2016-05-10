@@ -1,0 +1,19 @@
+{
+    "catalog": [{
+        "name": "SDMX-JSON testing",
+        "type": "group",
+        "isOpen": true,
+        "items": [
+            {
+                "name": "Example 1",
+                "type": "sdmx-json",
+                "url": "data/abs_sdmx_example1.json"
+            },
+            {
+                "name": "Example 2",
+                "type": "sdmx-json",
+                "url": "data/abs_sdmx_example2.json"
+            }
+        ]
+    }]
+}
