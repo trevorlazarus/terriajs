@@ -2,7 +2,7 @@
 
 import React from 'react';
 import defined from 'terriajs-cesium/Source/Core/defined';
-import when from 'terriajs-cesium/Source/ThirdParty/when';
+import Styles from './search-box.scss';
 
 /**
  * Super-simple dumb search box component.
@@ -11,99 +11,75 @@ import when from 'terriajs-cesium/Source/ThirdParty/when';
 export default React.createClass({
     propTypes: {
         onSearchTextChanged: React.PropTypes.func.isRequired,
-        initialText: React.PropTypes.string,
-        onFocus: React.PropTypes.func,
-        onEnterPressed: React.PropTypes.func
+        onDoSearch: React.PropTypes.func.isRequired,
+        searchText: React.PropTypes.string.isRequired,
+        onFocus: React.PropTypes.func
     },
 
-    getDefaultProps() {
-        return {
-            initialText: ''
-        };
-    },
-
-    getInitialState() {
-        return {
-            text: this.props.initialText
-        };
+    componentWillUnmount() {
+        this.removeDebounce();
     },
 
     hasValue() {
-        return !!this.state.text.length;
+        return this.props.searchText.length > 0;
     },
 
     searchWithDebounce() {
-        // Trigger search 250ms after the last input.
+        // Trigger search 2 seconds after the last input.
         this.removeDebounce();
 
-        const deferred = when.defer();
-        this.debouncePromise = deferred.promise;
-        this.debounceTimeout = setTimeout(() => {
-            this.props.onSearchTextChanged(this.state.text);
-            this.debounceTimeout = undefined;
-            deferred.resolve();
-        }, 250);
+        if (this.props.searchText.length > 0) {
+            this.debounceTimeout = setTimeout(() => {
+                this.search();
+            }, 2000);
+        }
+    },
+
+    search() {
+        this.removeDebounce();
+        this.props.onDoSearch();
     },
 
     removeDebounce() {
         if (defined(this.debounceTimeout)) {
             clearTimeout(this.debounceTimeout);
             this.debounceTimeout = undefined;
-            this.debouncePromise = undefined;
         }
     },
 
     handleChange(event) {
         const value = event.target.value;
-
-        this.setState({
-            text: value
-        });
-
+        this.props.onSearchTextChanged(value);
         this.searchWithDebounce();
     },
 
     clearSearch() {
-        this.setState({
-            text: ''
-        });
-        this.searchWithDebounce();
-    },
-
-    setText(text) {
-        this.setState({
-            text: text
-        });
+        this.props.onSearchTextChanged('');
+        this.search();
     },
 
     onKeyDown(event) {
-        if (event.keyCode === 13 && this.props.onEnterPressed) {
-            const triggerOnEnterPressed = () => this.props.onEnterPressed(event);
-
-            if (this.debouncePromise) {
-                this.debouncePromise.then(triggerOnEnterPressed);
-            } else {
-                triggerOnEnterPressed();
-            }
+        if (event.keyCode === 13) {
+            this.search();
         }
     },
 
     render() {
         const clearButton = (
-            <button type='button' className='btn btn--search-clear' onClick={this.clearSearch} />
+            <button type='button' className={Styles.searchClear} onClick={this.clearSearch} />
         );
 
         return (
-            <form className='form--search-data' autoComplete='off' onSubmit={event => event.preventDefault()}>
-                <label htmlFor='search' className='form__label'> Type keyword to search </label>
+            <form className={Styles.searchData} autoComplete='off' onSubmit={event => event.preventDefault()}>
+                <label htmlFor='search' className={Styles.formLabel}> Type keyword to search </label>
                 <input id='search'
                        type='text'
                        name='search'
-                       value={this.state.text}
+                       value={this.props.searchText}
                        onChange={this.handleChange}
                        onFocus={this.props.onFocus}
                        onKeyDown={this.onKeyDown}
-                       className='form__search-field field'
+                       className={Styles.searchField}
                        placeholder='Search'
                        autoComplete='off'/>
                 {this.hasValue() && clearButton}
